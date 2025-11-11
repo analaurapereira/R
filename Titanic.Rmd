@@ -1,0 +1,700 @@
+---
+title: "Análise descritiva - Titanic"
+author: "Ana Laura S. Pereira"
+date: "2025-10-03"
+output: html_document
+---
+# Bibliotecas (pacotes)
+
+```{r}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+
+```
+
+# Banco de dados: titanic
+
+```{r}
+
+titanic <- read_excel("~/Documentos/Ana/Documentos/Faculdade/R/titanic.xlsx")
+View(titanic) #visualização em nova janela
+print(titanic) # visualização logo abaixo
+```
+
+# 2. Contar quantos dados a base contém?
+
+```{r}
+nrow(titanic)
+```
+# Identifique as variáveis que não são significativas na utilização da modelagem?
+
+```{r}
+str(titanic) #descreve as variáveis
+
+
+titanic$passengerid <- NULL
+titanic$name <- NULL
+titanic$ticket <- NULL
+titanic$cabin <- NULL
+```
+# Renomear as variváveis
+
+```{r}
+
+titanic <- titanic %>%
+rename(
+Sobreviveu = survived,
+Idade = age,
+n_parentes = sibsp,
+n_filhos = parch,
+Classe = pclass,
+Sexo = sex,
+Valor = fare,
+Embarque = embarked
+)
+
+```
+
+# Converter para numérico as variáveis q estão como character
+
+```{r}
+titanic$Idade <- as.numeric(as.character(titanic$Idade))
+titanic$Valor <- as.numeric(as.character(titanic$Valor))
+```
+
+
+# verificar os valores ausentes da base
+
+```{r}
+valores_ausentes <- titanic %>%
+summarise_all(~sum(is.na(.))) ## resume todos os valores ausentes
+
+
+valores_ausentes_idade <- sum(is.na(titanic$Idade)) #somente a variável 
+valores_ausentes_idade
+```
+
+# 7. Verificar quantos valores ausentes existem nas colunas da
+#tabela ”Titanic”e, em seguida, eliminar as linhas que contêm esses valores ausentes.
+
+```{r}
+
+titanic_sem_ausentes <- na.omit(titanic)
+
+```
+
+# Tabelas de frequência
+# variável classe
+
+```{r}
+classe <- titanic$Classe # seleciona a variável de estudo
+classe <- sort(classe, na.last = TRUE) #ordena em ordem crescente
+
+# frequencia absoluta
+
+freq_absoluta_classe <- table(classe)
+freq_absoluta_classe
+
+#frequencia relativa prop.table
+
+freq_relativa_classe <- round(prop.table(freq_absoluta_classe),2)
+
+# Freq percentual
+
+freq_porcentagem_classe <- round(prop.table(freq_absoluta_classe) * 100, 2)
+
+# Freq acumulada
+
+freq_acumulada_classe <- cumsum(freq_absoluta_classe)
+
+# Tabela de frequencia cbind (juntas as colunas)
+
+
+tabela_classe <- cbind(freq_absoluta_classe, freq_relativa_classe,
+                           freq_porcentagem_classe, freq_acumulada_classe)
+
+
+# renomear as colunas
+
+colnames(tabela_classe) <- c("Frequência Absoluta",
+                                 "Frequência Relativa",
+                                 "Porcentagem",
+                                 "Frequência Acumulada")
+
+
+# Calcular o total das colunas
+
+total_classe <- c(sum(freq_absoluta_classe),
+sum(freq_relativa_classe),
+sum(freq_porcentagem_classe),
+max(freq_acumulada_classe))
+
+# Inserir o total na tabela (rbind)
+
+tabela_classe <- rbind(tabela_classe, total_classe)
+
+
+
+# Renomear a última linha
+
+rownames(tabela_classe)[nrow(tabela_classe)] <- "Total"
+
+# Mostrar tabela
+
+print(tabela_classe)
+```
+# 8. Criar uma tabela de frequência completa para a variável sobreviventes do dataset Titanic.
+
+
+```{r}
+
+# Seleciona e ordena a variável
+sobreviveu <- sort(titanic$Sobreviveu, na.last = TRUE)
+
+# Frequência absoluta
+freq_abs_sobreviveu <- table(sobreviveu)
+
+# Frequência relativa
+freq_rel_sobreviveu <- round(prop.table(freq_abs_sobreviveu), 2)
+
+# Porcentagem
+freq_pct_sobreviveu <- round(prop.table(freq_abs_sobreviveu) * 100, 2)
+
+# Frequência acumulada
+freq_acum_sobreviveu <- cumsum(freq_abs_sobreviveu)
+
+# Junta todas as colunas
+tabela_sobreviveu <- cbind(freq_abs_sobreviveu,
+                           freq_rel_sobreviveu,
+                           freq_pct_sobreviveu,
+                           freq_acum_sobreviveu)
+
+# Renomeia as colunas
+colnames(tabela_sobreviveu) <- c("Frequência Absoluta",
+                                 "Frequência Relativa",
+                                 "Porcentagem",
+                                 "Frequência Acumulada")
+
+# Adiciona o total
+total_sobreviveu <- c(sum(freq_abs_sobreviveu),
+                      sum(freq_rel_sobreviveu),
+                      sum(freq_pct_sobreviveu),
+                      max(freq_acum_sobreviveu))
+tabela_sobreviveu <- rbind(tabela_sobreviveu, total_sobreviveu)
+rownames(tabela_sobreviveu)[nrow(tabela_sobreviveu)] <- "Total"
+
+# Mostra a tabela
+print(tabela_sobreviveu)
+```
+
+# 9. Criar uma tabela de frequência completa para a variável Sexo do dataset Titanic.
+
+```{r}
+
+# Seleciona e ordena a variável
+sexo <- sort(titanic$Sexo, na.last = TRUE)
+
+# Frequência absoluta
+freq_abs_sexo <- table(sexo)
+
+# Frequência relativa
+freq_rel_sexo <- round(prop.table(freq_abs_sexo), 2)
+
+# Porcentagem
+freq_pct_sexo <- round(prop.table(freq_abs_sexo) * 100, 2)
+
+# Frequência acumulada
+freq_acum_sexo <- cumsum(freq_abs_sexo)
+
+# Junta todas as colunas
+tabela_sexo <- cbind(freq_abs_sexo,
+                     freq_rel_sexo,
+                     freq_pct_sexo,
+                     freq_acum_sexo)
+
+# Renomeia as colunas
+colnames(tabela_sexo) <- c("Frequência Absoluta",
+                           "Frequência Relativa",
+                           "Porcentagem",
+                           "Frequência Acumulada")
+
+# Adiciona o total
+total_sexo <- c(sum(freq_abs_sexo),
+                sum(freq_rel_sexo),
+                sum(freq_pct_sexo),
+                max(freq_acum_sexo))
+tabela_sexo <- rbind(tabela_sexo, total_sexo)
+rownames(tabela_sexo)[nrow(tabela_sexo)] <- "Total"
+
+# Mostra a tabela
+print(tabela_sexo)
+
+
+```
+
+#10. Criar uma tabela de frequência completa para a variável Embarque do dataset Titanic.
+
+```{r}
+# Seleciona e ordena a variável
+embarque <- sort(titanic$Embarque, na.last = TRUE)
+
+# Frequência absoluta
+freq_abs_embarque <- table(embarque)
+
+# Frequência relativa
+freq_rel_embarque <- round(prop.table(freq_abs_embarque), 2)
+
+# Porcentagem
+freq_pct_embarque <- round(prop.table(freq_abs_embarque) * 100, 2)
+
+# Frequência acumulada
+freq_acum_embarque <- cumsum(freq_abs_embarque)
+
+# Junta todas as colunas
+tabela_embarque <- cbind(freq_abs_embarque,
+                         freq_rel_embarque,
+                         freq_pct_embarque,
+                         freq_acum_embarque)
+
+# Renomeia as colunas
+colnames(tabela_embarque) <- c("Frequência Absoluta",
+                               "Frequência Relativa",
+                               "Porcentagem",
+                               "Frequência Acumulada")
+
+# Adiciona o total
+total_embarque <- c(sum(freq_abs_embarque),
+                    sum(freq_rel_embarque),
+                    sum(freq_pct_embarque),
+                    max(freq_acum_embarque))
+tabela_embarque <- rbind(tabela_embarque, total_embarque)
+rownames(tabela_embarque)[nrow(tabela_embarque)] <- "Total"
+
+# Mostra a tabela
+print(tabela_embarque)
+
+```
+
+# Tabela de frequência variável contínua
+
+```{r}
+str(titanic$Idade) # verificar se está como numérica
+#titanic$age <- as.numeric(titanic$age) # passando para número
+
+# Distribuição de frequências para variáveis quantitativas (classes de amplitude fixa)
+
+#Encontrando o valor mínimo e máximo da classe
+
+summary(titanic$Idade) #varias medidas
+
+#Outra maneira de encontrarmos
+min(titanic$Idade)
+max(titanic$Idade)
+
+
+# amplitude de cada classe
+k <- seq(0, 80, by = 10)  # Exemplo de breaks de 10 em 10 até 80
+
+
+#Construindo as classes
+labels <- c(
+    '   0.0  |—  10.0', 
+    '   10.0  |—  20.0', 
+    '  20.0  |—  30.0',
+    '  30.0  |—  40.0',
+    '  40.0  |—  50.0',
+    '  50.0  |—  60.0',
+    '  60.0  |—  70.0',
+    '  70.0  |—  80.0'
+)
+
+#Construindo a tabela
+frequencia_idade_agrupada <- table(
+    cut(
+        x = titanic$Idade,
+        breaks = k,
+        labels = labels,
+        include.lowest = TRUE
+    )
+)
+
+
+
+# Frequencia relativa
+frequencia_relativa_idade_agrupada  <- round(prop.table(frequencia_idade_agrupada ),2)
+
+
+# Frequência percentual
+percentual_idade_agrupada  <- round(prop.table(frequencia_idade_agrupada ) * 100,2)
+
+#Frequência acumulada
+freq_acumulada_idade_agrupada <- cumsum(frequencia_idade_agrupada )
+
+
+# Tabela
+dist_freq_quantitativas_idade_agrupada <- cbind(
+  'Frequência' = frequencia_idade_agrupada, 
+  'Freq. Relativa' = frequencia_relativa_idade_agrupada, 
+  'Porcentagem (%)' = percentual_idade_agrupada, 
+  'Freq. Acumulada' = freq_acumulada_idade_agrupada )
+
+
+
+# Calcular o total das colunas
+
+total_idade <- c(sum(frequencia_idade_agrupada),
+sum(frequencia_relativa_idade_agrupada),
+sum(percentual_idade_agrupada),
+max(freq_acumulada_idade_agrupada))
+
+# Inserir o total na tabela (rbind)
+
+dist_freq_quantitativas_idade_agrupada <- rbind(dist_freq_quantitativas_idade_agrupada, 'Total' = total_idade)
+
+
+
+# Mostrar tabela
+
+print(dist_freq_quantitativas_idade_agrupada)
+```
+
+
+# 11. Construir uma tabela de frequência completa para a variável Valor do dataset Titanic, utilizando os conceitos de amplitude, classes e frequência.
+
+
+
+```{r}
+# Desativa notação científica
+options(scipen = 999)
+
+# Calcula amplitude para gerar até 10 intervalos
+max_valor <- max(titanic$Valor, na.rm = TRUE)
+intervalo <- ceiling(max_valor / 10)
+
+# Cria intervalos de acordo com o valor máximo
+valor <- cut(titanic$Valor, breaks = seq(0, max_valor, by = intervalo))
+
+# Frequência absoluta
+freq_abs_valor <- table(valor)
+
+# Frequência relativa
+freq_rel_valor <- round(prop.table(freq_abs_valor), 2)
+
+# Porcentagem
+freq_pct_valor <- round(prop.table(freq_abs_valor) * 100, 2)
+
+# Frequência acumulada
+freq_acum_valor <- cumsum(freq_abs_valor)
+
+# Junta as colunas
+tabela_valor <- cbind(freq_abs_valor,
+                      freq_rel_valor,
+                      freq_pct_valor,
+                      freq_acum_valor)
+
+# Renomeia colunas
+colnames(tabela_valor) <- c("Frequência Absoluta",
+                            "Frequência Relativa",
+                            "Porcentagem",
+                            "Frequência Acumulada")
+
+# Adiciona linha Total
+total_valor <- c(sum(freq_abs_valor),
+                 sum(freq_rel_valor),
+                 sum(freq_pct_valor),
+                 max(freq_acum_valor))
+tabela_valor <- rbind(tabela_valor, total_valor)
+
+# Renomeia a última linha
+rownames(tabela_valor)[nrow(tabela_valor)] <- "Total"
+
+# Exibe a tabela final
+print(tabela_valor)
+
+```
+
+```{r}
+# Dados para o gr´afico de pizza
+frequencia_classe <- table(titanic_data$pclass)
+# Criando o gr´afico de pizza
+pie(frequencia_classe,
+labels = c("1ª Classe", "2ª Classe", "3ª Classe"),
+col = c("red", "blue", "green"),
+main = "Distribui¸c~ao das Classes dos Passageiros")
+
+
+# Dados para o gr´afico de barras
+frequencia_classe <- table(titanic_data$pclass)
+# Criando o gr´afico de barras
+barplot(frequencia_classe,
+col = c("red", "blue", "green"),
+xlab = "Classe",
+ylab = "Frequ^encia",
+main = "Frequ^encia das Classes dos Passageiros")
+
+
+# Criando o histograma
+hist(titanic_data$fare,
+breaks = 20,
+col = "lightblue",
+xlab = "Valor do Bilhete",
+ylab = "Frequ^encia",
+main = "Distribui¸c~ao do Valor dos Bilhetes")
+
+
+# Criar o gr´afico de colunas com ggplot2
+ggplot(dados_sobreviventes, aes(x = Sobreviv^encia, y = Freqgeom_col() +
+labs(title = "Distribui¸c~ao de Sobreviventes",
+x = "Sobreviv^encia",
+y = "Frequ^encia") +
+scale_fill_manual(values = c("orange", "purple")) +
+theme_minimal()
+
+
+# Carregar o pacote ggplot2
+library(ggplot2)
+# Preparar os dados
+dados_classe <- as.data.frame(table(titanic_data$pclass))
+colnames(dados_classe) <- c("Classe", "Frequência")
+
+
+# Criar o gr´afico de pizza com ggplot2
+ggplot(dados_classe, aes(x = "", y = Frequ^encia, fill = Clageom_bar(stat = "identity", width = 1) +
+coord_polar("y") +
+labs(title = "Distribui¸c~ao das Classes dos Passageiros")theme_void() +
+scale_fill_manual(values = c("red", "blue", "green"))
+
+
+# Carregar o pacote ggplot2
+library(ggplot2)
+# Criar o histograma com ggplot2
+ggplot(titanic_data, aes(x = fare)) +
+geom_histogram(binwidth = 10, fill = "lightblue", color =labs(title = "Distribui¸c~ao do Valor dos Bilhetes",
+x = "Valor do Bilhete",
+y = "Frequ^encia") +
+theme_minimal()
+```
+
+#12. Criar um gr´afico de pizza que mostre a distribuição de gêneros (sex) entre os passageiros do Titanic.
+
+```{r}
+# Cria gráfico de pizza para a variável sexo
+freq_sexo <- table(titanic$Sexo)
+pie(freq_sexo,
+    labels = names(freq_sexo),
+    col = c("lightblue", "pink"),
+    main = "Distribuição de Gênero dos Passageiros")
+
+```
+
+#13. Criar um gráfico de colunas que mostre a distribuição de passageiros por classe (pclass).
+```{r}
+freq_classe <- table(titanic$Classe)
+barplot(freq_classe,
+        col = c("red", "blue", "green"),
+        xlab = "Classe",
+        ylab = "Frequência",
+        main = "Distribuição de Passageiros por Classe")
+
+
+```
+#14. Criar um histograma que visualize a distribuição de idades (age) dos passageiros.
+```{r}
+hist(titanic$Idade,
+     breaks = 20,
+     col = "lightblue",
+     xlab = "Idade",
+     ylab = "Frequência",
+     main = "Distribuição das Idades dos Passageiros")
+
+```
+#15. Criar um gráfico de barras que mostre a distribuição de passageiros por porto de embarque (embarked).
+```{r}
+freq_embarque <- table(titanic$Embarque)
+barplot(freq_embarque,
+        col = c("orange", "purple", "lightgreen"),
+        xlab = "Porto de Embarque",
+        ylab = "Frequência",
+        main = "Distribuição de Passageiros por Porto de Embarque")
+
+```
+
+#16. Calcular as medidas de centralidade para as variáveis quantitativas.
+```{r}
+media_idade <- mean(titanic$Idade, na.rm = TRUE)
+media_valor <- mean(titanic$Valor, na.rm = TRUE)
+
+# Mediana
+mediana_idade <- median(titanic$Idade, na.rm = TRUE)
+mediana_valor <- median(titanic$Valor, na.rm = TRUE)
+
+# Moda
+moda_idade <- as.numeric(names(which.max(table(titanic$Idade))))
+moda_valor <- as.numeric(names(which.max(table(titanic$Valor))))
+
+# Construindo as colunas
+variavel <- c("Idade", 
+              "Valor")
+media <- c(media_idade, media_valor)
+mediana <- c(mediana_idade, mediana_valor)
+moda <- c(moda_idade, moda_valor)
+
+# Tabela com cbind (no mesmo estilo das frequências)
+tabela_centralidade <- cbind(
+  Variável = variavel,
+  Média = round(media, 2),
+  Mediana = round(mediana, 2),
+  Moda = round(moda, 2)
+)
+
+# Mostrar a tabela
+print(tabela_centralidade)
+
+```
+
+#17. Calcular a moda para as variáveis qualitativas
+```{r}
+moda_sexo <- names(which.max(table(titanic$Sexo)))
+moda_classe <- names(which.max(table(titanic$Classe)))
+moda_embarque <- names(which.max(table(titanic$Embarque)))
+
+variavel_qual <- c("Sexo", "Classe", "Embarque")
+moda_qual <- c(moda_sexo, moda_classe, moda_embarque)
+
+tabela_moda_qual <- cbind(
+  Variável = variavel_qual,
+  Moda = moda_qual
+)
+
+print(tabela_moda_qual)
+
+```
+
+```{r}
+# Exemplo de vetor com NA
+dados <- c(10, 12, NA, 8, 9, 11, NA)
+# 1) Imputa¸c~ao pela m´edia
+m <- mean(dados, na.rm = TRUE)
+dados_media <- ifelse(is.na(dados), m, dados)
+# 2) Imputa¸c~ao pela mediana
+med <- median(dados, na.rm = TRUE)
+dados_mediana <- ifelse(is.na(dados), med, dados)
+# 3) Imputa¸c~ao pela moda (num´erica)
+moda <- as.numeric(names(which.max(table(dados))))
+dados_moda <- ifelse(is.na(dados), moda, dados)
+
+
+library(dplyr)
+library(tidyr)
+# Calcular média e mediana ignorando NA
+imput <- dados %>%
+summarise(
+Variavel1 = mean(Variavel1, na.rm = TRUE),
+Variavel2 = median(Variavel2, na.rm = TRUE)
+)
+# Substituir os valores ausentes
+dados_imputados <- dados %>%
+replace_na(as.list(imput))
+
+
+library(dplyr)
+library(tidyr)
+# Calcular média e mediana ignorando NA
+imput <- dados %>%
+summarise(
+Variavel1 = mean(Variavel1, na.rm = TRUE),
+Variavel2 = median(Variavel2, na.rm = TRUE)
+)
+# Substituir os valores ausentes
+dados_imputados <- dados %>%
+replace_na(as.list(imput))
+```
+
+#18. Substituir os valores ausentes das variáveis quantitativas e qualitativas.
+
+```{r}
+# Substituição quantitativas pela média
+titanic$Idade[is.na(titanic$Idade)] <- mean(titanic$Idade, na.rm = TRUE)
+titanic$Valor[is.na(titanic$Valor)] <- mean(titanic$Valor, na.rm = TRUE)
+
+# Substituição qualitativas pela moda
+titanic$Sexo[is.na(titanic$Sexo)] <- moda_sexo
+titanic$Embarque[is.na(titanic$Embarque)] <- moda_embarque
+
+# Contagem de NAs restantes
+valores_ausentes <- colSums(is.na(titanic))
+
+tabela_ausentes <- cbind(
+  Variável = names(valores_ausentes),
+  "Valores Ausentes" = valores_ausentes
+)
+
+print(tabela_ausentes)
+```
+
+#19. Calcular os quartis, decis e percentis das variáveis quantitativas da base do Titanic.
+```{r}
+# Quartis
+quartis_idade <- quantile(titanic$Idade, probs = c(0.25, 0.5, 0.75))
+quartis_valor <- quantile(titanic$Valor, probs = c(0.25, 0.5, 0.75))
+
+# Decis
+decis_idade <- quantile(titanic$Idade, probs = seq(0.1, 0.9, by = 0.1))
+decis_valor <- quantile(titanic$Valor, probs = seq(0.1, 0.9, by = 0.1))
+
+# Percentil 90
+percentil90_idade <- quantile(titanic$Idade, probs = 0.9)
+percentil90_valor <- quantile(titanic$Valor, probs = 0.9)
+
+# Tabelas no formato cbind
+tabela_quartis <- cbind(
+  Medida = c("1º Quartil", "2º Quartil (Mediana)", "3º Quartil"),
+  Idade = round(quartis_idade, 2),
+  Valor = round(quartis_valor, 2)
+)
+
+tabela_percentis <- cbind(
+  Medida = c("Percentil 90"),
+  Idade = round(percentil90_idade, 2),
+  Valor = round(percentil90_valor, 2)
+)
+
+print(tabela_quartis)
+print(tabela_percentis)
+```
+
+#20. Construir um gr´afico de dispers˜ao entre duas variáveis quantitativas (por exemplo, idade e tarifa). Interpretar.
+```{r}
+plot(titanic$Idade, titanic$Valor,
+     main = "Dispersão: Idade x Valor do Bilhete",
+     xlab = "Idade (anos)",
+     ylab = "Valor do Bilhete",
+     col = "blue",
+     pch = 19)
+```
+
+#21. Calcular o coeficiente de correlação entre duas variáveis quantitativas. Qual o tipo de correlação encontrada?
+```{r}
+correlacao <- cor(titanic$Idade, titanic$Valor, use = "complete.obs")
+
+tabela_cor <- cbind(
+  Variáveis = "Idade x Valor",
+  "Coeficiente de Correlação" = round(correlacao, 3)
+)
+
+print(tabela_cor)
+```
+
+#22. Construir um boxplot para uma variável quantitativa, segmentando por uma variável categórica (por exemplo, tarifa por classe ou idade por sobrevivência).
+```{r}
+boxplot(Valor ~ Classe, data = titanic,
+        main = "Boxplot do Valor do Bilhete por Classe",
+        xlab = "Classe",
+        ylab = "Valor do Bilhete",
+        col = c("red", "blue", "green"))
+```
+
+#23. Interpretar os resultados obtidos nos exercícios anteriores. Há indícios de relação entre as variáveis analisadas?
+
+# Os resultados indicam que passageiros da 1ª classe pagaram, em média, bilhetes com valores mais altos e menor dispersão. Já as classes inferiores apresentam valores mais baixos e maior variabilidade. Há, portanto, uma relação clara entre a Classe e o Valor do bilhete.
